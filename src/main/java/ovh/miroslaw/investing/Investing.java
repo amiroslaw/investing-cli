@@ -1,34 +1,87 @@
 package ovh.miroslaw.investing;
 
-import com.ongres.process.FluentProcess;
-import com.ongres.process.Output;
+import ovh.miroslaw.investing.model.Asset;
+import ovh.miroslaw.investing.model.Portfolio;
+import ovh.miroslaw.investing.output.Alert;
+import ovh.miroslaw.investing.output.Console;
+import ovh.miroslaw.investing.output.Notification;
+import ovh.miroslaw.investing.output.Output;
+import ovh.miroslaw.investing.output.Profit;
+import ovh.miroslaw.investing.output.ShortWithSymbol;
+import ovh.miroslaw.investing.output.Verbose;
+import ovh.miroslaw.investing.portfolio.PortfolioFilter;
+import ovh.miroslaw.investing.portfolio.PortfolioReader;
+import ovh.miroslaw.investing.stock.MarketFactory;
+import ovh.miroslaw.investing.stock.MarketFactory.Market;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Spec;
 import picocli.jansi.graalvm.AnsiConsole;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static ovh.miroslaw.investing.portfolio.PortfolioReader.CONFIG_FILE_NAME;
+import static ovh.miroslaw.investing.portfolio.PortfolioReader.PORTFOLIO_FILE_NAME;
+import static ovh.miroslaw.investing.portfolio.PortfolioReader.getConfigPath;
 
 @Command(name = "investing cli", mixinStandardHelpOptions = true,
          version = "1.0",
          description = "Your investing portfolio")
 class Investing implements Callable<Integer> {
-    private static final String PORTFOLIO_FILE_NAME = "portfolio";
-    private static final String CONFIG_FILE_NAME = "investing";
 
-    @Option(names = {"-p", "--portfolio"}, description = "The file with the assets. Provide file or put it in one of the folders: - $HOME \n- " + CONFIG_FILE_NAME + "/" + PORTFOLIO_FILE_NAME )
+    @Spec
+    CommandSpec commandSpec;
+
+    @Option(names = "--no-errors", negatable = true,
+            description = "Doesn't print errors in the output")
+    static boolean errorsOption = true;
+
+    @Option(names = {"-v", "--verbose"},
+            description = "Shows verbose output.")
+    private boolean verboseOption;
+
+    @Option(names = {"-p", "--portfolio"},
+            description = """
+                    Shows profits from your portfolio. If sell or buy price are not provided in the config file it will calculate revenue.
+                    Remember to change --exchange-currency in order to have the same currency in all markets. 
+                    """)
+    private boolean holdingOption;
+
+    @Option(names = {"-n", "--notify"},
+            description = "Shows notification in dunst.")
+    private boolean notifyOption;
+
+    @Option(names = {"-a", "--alert"},
+            description = "Check out alerts. With the --sound option it will play sound with notification")
+    private boolean alertOption;
+
+    @Option(names = {"-c", "--configuration"},
+            description =
+                    "The file with the assets that you want to trace or you own. Provide file or put it in one of the folders: - $HOME \n- "
+                            + CONFIG_FILE_NAME + "/" + PORTFOLIO_FILE_NAME)
     private Optional<File> portfolioFile;
 
+    @Option(names = {"-e", "--exchange-currency"}, description = "Exchange currency for cryptocurrency currency pair.")
+    private Optional<String> exchangeCurrency;
+
+    @Option(names = {"-o", "--only"},
+            description = "Process only for specific assets. Provide list of the assets symbol separated by comma")
+    private Optional<String> onlyAssetsOption;
+
+    @Option(names = {"-t", "--type"}, description = "Process only for specific assets. Accepts: CRYPTO, GPW, STOCK")
+    private Optional<String> typeOption;
+
     @Option(names = {"-k", "--key"}, description = "Private access key.\nGet it from https://marketstack.com/dashboard")
-    private Optional<String> accessKey = Optional.of("0a2baec9d1164d8accad1ec57c55fd88");
+    private Optional<String> accessKey;
+
+    @Option(names = {"-s", "--sound"},
+            description = "Audio file for the sound alerts. It requires mpv.")
+    private Optional<File> soundAlert;
 
     public static void main(String... args) {
         int exitCode;
@@ -40,50 +93,33 @@ class Investing implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        final String configPath = portfolioFile.map(File::getAbsolutePath).orElse(getConfigPath());
-        showNotification("test");
-        try (Stream<String> stream = Files.lines(Paths.get(configPath))) {
-            stream.forEach(System.out::println);
-        } catch (IOException e) {
-            e.printStackTrace();
+        commandSpec.commandLine().setExecutionExceptionHandler(new PrintExceptionMessageHandler(errorsOption));
+        final File portfolioConfig = portfolioFile.orElse(getConfigPath().toFile());
+        List<Portfolio> portfolio = PortfolioReader.getPortfolio(portfolioConfig);
+        PortfolioFilter filter = new PortfolioFilter(portfolio);
+        portfolio = filter.applyFilter(typeOption, onlyAssetsOption);
+
+        MarketFactory marketFactory = new MarketFactory(commandSpec);
+        final List<? extends Asset> assets = marketFactory.getAssets(portfolio, Market.BIZ, Market.COINBASE);
+
+        Output output = new ShortWithSymbol(portfolio);
+        if (verboseOption) {
+            output = new Verbose(output);
+        }
+        if (holdingOption) {
+            output = new Profit(portfolio, output);
+        }
+        if (alertOption) {
+            output = new Alert(portfolio, soundAlert, output);
+        }
+        if (notifyOption) {
+            output = new Notification(output);
         }
 
-//        fluentProcess();
+        output = new Console(output);
+        output.display(assets);
+
         return 0;
-    }
-
-    private void showNotification(String msg) {
-        FluentProcess.start("notify-send", msg);
-    }
-
-    private String getConfigPath() {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        final Map<String, String> environment = processBuilder.environment();
-        final Optional<String> xdgConfigHome = Optional.of(environment.get("XDG_CONFIG_HOME"));
-        final String home = environment.get("HOME");
-        return xdgConfigHome.map(e -> e + "/" +CONFIG_FILE_NAME )
-                .orElse(home + ".") + "/" + PORTFOLIO_FILE_NAME;
-    }
-
-    private void fluentProcess() {
-        final String ls = FluentProcess.builder("ls").arg("-a")
-                .start()
-                .stream().collect(Collectors.joining("\n"));
-
-        final FluentProcess fluentProcess = FluentProcess.builder("ls").arg("-a").start();
-        final Output output = fluentProcess.tryGet();
-        output.error().ifPresent(System.out::println);
-        output.output().ifPresent(System.out::println);
-        fluentProcess.close();
-
-        FluentProcess.builder("ls").arg("--fjdisf").start().tryGet().output().ifPresent(System.out::println);
-
-        final FluentProcess process = FluentProcess.builder("ls").arg("--fjdisf").start();
-        if (process.isSuccessful()) {
-            process.writeToOutputStream(System.out);
-        } else {
-            System.out.println("error");
-        }
     }
 
 }
