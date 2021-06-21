@@ -1,0 +1,96 @@
+= Investing-cli
+
+The simple terminal application for tracking financial assets. It can monitor profits from a portfolio. +
+Motivation for making this application was to try the new java features (java 16), graalVM and libraries like http://kong.github.io/unirest-java/#responses[unirest java], https://gitlab.com/ongresinc/fluent-process[fluent process] and the framework https://github.com/remkop/picocli[picocli]. +
+The program supports cryptocurrencies (Coinbase APi) and stock market assets (https://www.biznesradar.pl/[Biznes Radar] side). I wanted to track the prices from GPW - Polish stock exchange, unfortunately I couldn't find free API for that, so I have to scraped date from the Biznes Radar side. + 
+Currently, it runs only in GNU/Linux distributions. It requires `mpv` nad `notiy-send` commands.
+
+=== Features:
+- tracking financial assets
+- creating a portfolio with holdings
+- calculating profit
+- adding alerts
+- support cryptocurrency and GPW
+
+=== How to use
+In the first place you have to make configuration file `portfolio.json` in `$HOME` or `XDG_CONFIG_HOME` folder.
+
+.Example portfolio.json file
+[source,json]
+----
+[
+	{
+		"assetName": "CIECH",
+		"assetSymbol": "CIE" ,
+		"type": "GPW",
+		"holdings" : [
+			{ 
+				"buyPrice" : 44,
+				"amount": 32
+			},
+			{ 
+				"sellPrice" : 64,
+				"amount": 88
+			}
+		],
+		"alerts" : [
+			{ "price" : 52 ,
+				"alertCondition": "ABOVE"
+			},
+			{ "price" : 40 ,
+				"alertCondition": "BELOW"
+			}
+		]
+	}
+]
+----
+
+**Parameters** +
+
+- type - asset type `GPW` or `CRYPTO`
+- assetName - `GPW` type it have to mach the asset's name from Biznes Radar
+- assetSymbol - currency symbol
+- holdings - put `buyPrice` or `sellPrice` depends on of the investing type and how much did you invested
+- alerts - the price level when alert will be active. It takes one of the `alertCondition` - `BELOW` or `ABOVE`
+
+==== Available commands
+
+----
+Usage: investing cli [-ahnpvV] [--[no-]errors] [-c=<portfolioFile>]
+                     [-e=<exchangeCurrency>] [-k=<accessKey>]
+                     [-o=<onlyAssetsOption>] [-s=<soundAlert>] [-t=<typeOption>]
+Your investing portfolio
+  -a, --alert                Check out alerts. With the --sound option it will
+                               play sound with notification
+  -c, --configuration=<portfolioFile>
+                             The file with the assets that you want to trace or
+                               you own. Provide file or put it in one of the
+                               folders: - $HOME
+                             - investing/portfolio.json
+  -e, --exchange-currency=<exchangeCurrency>
+                             Exchange currency for cryptocurrency currency pair.
+  -h, --help                 Show this help message and exit.
+  -n, --notify               Shows notification in dunst.
+      --[no-]errors          Doesn't print errors in the output
+  -o, --only=<onlyAssetsOption>
+                             Process only for specific assets. Provide list of
+                               the assets symbol separated by comma
+  -p, --portfolio            Shows profits from your portfolio. If sell or buy
+                               price are not provided in the config file it
+                               will calculate revenue.
+                             Remember to change --exchange-currency in order to
+                               have the same currency in all markets.
+  -s, --sound=<soundAlert>   Audio file for the sound alerts. It requires mpv.
+  -t, --type=<typeOption>    Process only for specific assets. Accepts: CRYPTO,
+                               GPW, STOCK
+  -v, --verbose              Shows verbose output.
+  -V, --version              Print version information and exit.
+----
+
+=== Used technology
+
+- Java 16, graalVM
+- jsoup
+- https://github.com/remkop/picocli[picocli]
+- http://kong.github.io/unirest-java/#responses[unirest java] 
+- https://gitlab.com/ongresinc/fluent-process[fluent process]
