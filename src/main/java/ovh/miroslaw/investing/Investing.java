@@ -45,6 +45,10 @@ class Investing implements Callable<Integer> {
             description = "Shows verbose output.")
     private boolean verboseOption;
 
+    @Option(names = {"-l", "--one-line"},
+            description = "Prints short output in one line. Good for showing information on a status bar.")
+    private boolean barOutputOption;
+
     @Option(names = {"-p", "--portfolio"},
             description = """
                     Shows profits from your portfolio. If sell or buy price are not provided in the config file it will calculate revenue.
@@ -57,12 +61,13 @@ class Investing implements Callable<Integer> {
     private boolean notifyOption;
 
     @Option(names = {"-a", "--alert"},
-            description = "Check out alerts. With the --sound option it will play sound with notification")
+            description = "Check out alerts. With the --sound option it will play sound")
     private boolean alertOption;
 
     @Option(names = {"-c", "--configuration"},
             description =
-                    "The file with the assets that you want to trace or you own. Provide file or put it in one of the folders: - $HOME" + "/" + PORTFOLIO_FILE_NAME +
+                    "The file with the assets that you want to trace or you own. Provide file or put it in one of the folders: - $HOME"
+                            + "/" + PORTFOLIO_FILE_NAME +
                             "\n- " + CONFIG_FILE_NAME + "/" + PORTFOLIO_FILE_NAME)
     private Optional<File> portfolioFile;
 
@@ -80,7 +85,7 @@ class Investing implements Callable<Integer> {
     private Optional<String> accessKey;
 
     @Option(names = {"-s", "--sound"},
-            description = "Audio file for the sound alerts. It requires mpv.")
+            description = "Audio file for the sound alerts. It requires ffmpeg.")
     private Optional<File> soundAlert;
 
     public static void main(String... args) {
@@ -102,7 +107,10 @@ class Investing implements Callable<Integer> {
         MarketFactory marketFactory = new MarketFactory(commandSpec);
         final List<? extends Asset> assets = marketFactory.getAssets(portfolio, Market.BIZ, Market.COINBASE);
 
-        Output output = new ShortWithSymbol(portfolio);
+        Output output = new Output() {};
+        if (barOutputOption) {
+            output = new ShortWithSymbol(portfolio, output);
+        }
         if (verboseOption) {
             output = new Verbose(output);
         }

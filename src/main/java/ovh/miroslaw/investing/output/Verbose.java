@@ -22,7 +22,7 @@ public class Verbose extends OutputDecorator {
     @Override
     public String display(List<? extends Asset> assets) {
         String msg = output.display(assets);
-        msg += System.lineSeparator() + verboseOutput.apply(assets);
-        return msg;
+        msg = msg.isBlank() ? "" : msg + System.lineSeparator();
+        return msg + verboseOutput.apply(assets);
     }
 }

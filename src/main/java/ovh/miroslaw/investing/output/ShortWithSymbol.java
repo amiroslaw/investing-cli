@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class ShortWithSymbol implements Output {
+public class ShortWithSymbol extends Output {
 
     private final BiFunction<List<? extends Asset>, Map<String, Portfolio>, String> shortOutputSymbol = (e, p) -> e
             .stream()
@@ -20,13 +20,19 @@ public class ShortWithSymbol implements Output {
 
     private List<Portfolio> portfolio;
 
-    public ShortWithSymbol(List<Portfolio> portfolio) {
+    private Output output;
+
+    public ShortWithSymbol(List<Portfolio> portfolio, Output output) {
+        this.output = output;
         this.portfolio = portfolio;
     }
 
     @Override
     public String display(List<? extends Asset> assets) {
         final Map<String, Portfolio> portfolioMap = PortfolioUtil.convertPortfolioToSymbolMap(portfolio);
-        return shortOutputSymbol.apply(assets, portfolioMap);
+
+        String msg = output.display(assets);
+        msg = msg.isBlank() ? "" : msg + System.lineSeparator();
+        return msg + shortOutputSymbol.apply(assets, portfolioMap);
     }
 }

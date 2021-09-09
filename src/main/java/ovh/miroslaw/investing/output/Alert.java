@@ -12,9 +12,9 @@ import java.util.Optional;
 
 public class Alert extends OutputDecorator {
 
-    private List<Portfolio> portfolio;
+    private final List<Portfolio> portfolio;
     private final Optional<File> soundOption;
-    private Output output;
+    private final Output output;
 
     public Alert(List<Portfolio> portfolio, Optional<File> soundOption, Output output) {
         this.portfolio = portfolio;
@@ -29,12 +29,13 @@ public class Alert extends OutputDecorator {
         soundOption.stream()
                 .filter(e -> !alertMsg.isBlank())
                 .forEach(this::soundNotification);
-        msg += System.lineSeparator() + alertMsg;
-        return msg;
+
+        msg = msg.isBlank() ? "" : msg + System.lineSeparator();
+        return msg + alertMsg;
     }
 
     public void soundNotification(File sound) {
-        FluentProcess.start("mpv", "--no-video", sound.getAbsolutePath())
+        FluentProcess.start("ffplay", "-nodisp", "-autoexit", "-loglevel", "-8", "-volume", "10", sound.getAbsolutePath())
                 .tryGet().exception().ifPresent(e -> System.out.println(
                 Ansi.AUTO.string("@|bold,red Couldn't play sound alert " + sound.getAbsolutePath() + ".|@"))
         );
