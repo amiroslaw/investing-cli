@@ -79,8 +79,8 @@
                 <!-- annotationProcessorPaths requires maven-compiler-plugin version 3.5 or higher -->
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>16</source>
-                    <target>16</target>
+                    <source>17</source>
+                    <target>17</target>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>info.picocli</groupId>
