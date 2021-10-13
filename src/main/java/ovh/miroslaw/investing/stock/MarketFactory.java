@@ -11,6 +11,7 @@ import picocli.CommandLine.Model.OptionSpec;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -21,18 +22,21 @@ public class MarketFactory {
     private static Optional<String> exchangeCurrency;
     private static Optional<String> accessKey;
     private static boolean errorOption;
+    private static final BiFunction<Optional<String>, String, YahooService> getYahooService = (currency, key) -> currency
+            .map(e -> new YahooService(key, e))
+            .orElse(new YahooService(key));
 
     public MarketFactory(CommandSpec commandSpec) {
         this.commandSpec = commandSpec;
         exchangeCurrency = getCommandParameter("-e").flatMap(ArgSpec::getValue);
         accessKey = getCommandParameter("-k").flatMap(ArgSpec::getValue);
         errorOption = getCommandParameter("--no-errors")
-                .map(e -> (Boolean)e.getValue())
+                .map(e -> (Boolean) e.getValue())
                 .orElse(true);
     }
 
     public List<Asset> getAssets(List<Portfolio> portfolio, Market market) {
-        return combineAssets(Market.COINBASE.assetsInfo.apply(portfolio), market.assetsInfo.apply(portfolio));
+        return (List<Asset>) market.assetsInfo.apply(portfolio);
     }
 
     public List<Asset> getAssets(List<Portfolio> portfolio, Market stock, Market crypto) {
@@ -74,6 +78,9 @@ public class MarketFactory {
                 .map(c -> c.getAssetsInfo(e))
                 .orElse(new CoinbaseService().getAssetsInfo(e))
         ),
+        YAHOO(e -> accessKey.map(key -> getYahooService.apply(exchangeCurrency, key))
+                .map(y -> y.getAssetsInfo(e))
+                .orElse(Collections.emptyList())),
         BIZ(e -> new BiznesRadarService().getAssetsInfo(e)),
         MARKETSTACK(MarketFactory::getMarketstackAssets);
 

@@ -19,6 +19,7 @@ public class Profit extends Output {
     public Profit(List<Portfolio> portfolio, Output output) {
         this.output = output;
         this.portfolio = portfolio;
+        System.out.println(portfolio);
     }
 
     @Override

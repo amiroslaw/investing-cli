@@ -105,7 +105,7 @@ class Investing implements Callable<Integer> {
         portfolio = filter.applyFilter(typeOption, onlyAssetsOption);
 
         MarketFactory marketFactory = new MarketFactory(commandSpec);
-        final List<? extends Asset> assets = marketFactory.getAssets(portfolio, Market.BIZ, Market.COINBASE);
+        final List<? extends Asset> assets = marketFactory.getAssets(portfolio, Market.YAHOO);
 
         Output output = new Output() {};
         if (barOutputOption) {
