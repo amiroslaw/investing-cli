@@ -13,7 +13,7 @@ public class Verbose extends OutputDecorator {
             .map(Objects::toString)
             .collect(Collectors.joining(""));
 
-    private Output output;
+    private final Output output;
 
     public Verbose(Output output) {
         this.output = output;

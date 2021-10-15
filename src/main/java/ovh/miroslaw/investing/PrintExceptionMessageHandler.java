@@ -6,7 +6,7 @@ import picocli.CommandLine.ParseResult;
 
 public class PrintExceptionMessageHandler implements IExecutionExceptionHandler {
 
-    private boolean printError;
+    private final boolean printError;
 
     public PrintExceptionMessageHandler(boolean printError) {
         this.printError = printError;

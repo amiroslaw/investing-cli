@@ -11,8 +11,8 @@ import ovh.miroslaw.investing.output.ShortWithSymbol;
 import ovh.miroslaw.investing.output.Verbose;
 import ovh.miroslaw.investing.portfolio.PortfolioFilter;
 import ovh.miroslaw.investing.portfolio.PortfolioReader;
+import ovh.miroslaw.investing.stock.MarketEnum;
 import ovh.miroslaw.investing.stock.MarketFactory;
-import ovh.miroslaw.investing.stock.MarketFactory.Market;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -78,7 +78,7 @@ class Investing implements Callable<Integer> {
             description = "Process only for specific assets. Provide list of the assets symbol separated by comma")
     private Optional<String> onlyAssetsOption;
 
-    @Option(names = {"-t", "--type"}, description = "Process only for specific assets. Accepts: CRYPTO, GPW, STOCK")
+    @Option(names = {"-t", "--type"}, description = "Process only for specific assets. Accepts: CRYPTO, GPW, STOCK, CC (crypto crypto)")
     private Optional<String> typeOption;
 
     @Option(names = {"-k", "--key"}, description = "Private access key.\nGet it from https://marketstack.com/dashboard")
@@ -105,7 +105,7 @@ class Investing implements Callable<Integer> {
         portfolio = filter.applyFilter(typeOption, onlyAssetsOption);
 
         MarketFactory marketFactory = new MarketFactory(commandSpec);
-        final List<? extends Asset> assets = marketFactory.getAssets(portfolio, Market.YAHOO);
+        final List<? extends Asset> assets = marketFactory.getAssets(portfolio, MarketEnum.YAHOO);
 
         Output output = new Output() {};
         if (barOutputOption) {

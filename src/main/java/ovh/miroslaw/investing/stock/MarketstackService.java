@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class MarketstackService {
 
     public static final String BASE_URL = "http://api.marketstack.com";
-    private String accessKey;
+    private final String accessKey;
 
     public MarketstackService(String accessKey) {
         this.accessKey = accessKey;
@@ -29,7 +29,7 @@ public class MarketstackService {
 
     public List<Marketstack> getAssetsInfo(List<Portfolio> portfolio) throws RetrievingDataException {
         Unirest.config().defaultBaseUrl(BASE_URL);
-        HttpResponse<JsonNode> response = null;
+        HttpResponse<JsonNode> response;
         try {
             response = Unirest.get("/{version}/{duration}/latest")
                     .routeParam("version", "v1")

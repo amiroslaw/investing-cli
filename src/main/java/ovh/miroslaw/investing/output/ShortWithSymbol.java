@@ -18,9 +18,9 @@ public class ShortWithSymbol extends Output {
             .map(a -> p.get(a.assetName()).assetSymbol() + " " + a.price().setScale(2, RoundingMode.DOWN))
             .collect(Collectors.joining("; "));
 
-    private List<Portfolio> portfolio;
+    private final List<Portfolio> portfolio;
 
-    private Output output;
+    private final Output output;
 
     public ShortWithSymbol(List<Portfolio> portfolio, Output output) {
         this.output = output;

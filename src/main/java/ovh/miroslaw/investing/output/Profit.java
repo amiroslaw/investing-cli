@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 public class Profit extends Output {
 
-    private Output output;
-    private List<Portfolio> portfolio;
+    private final Output output;
+    private final List<Portfolio> portfolio;
 
     public Profit(List<Portfolio> portfolio, Output output) {
         this.output = output;
@@ -34,11 +34,11 @@ public class Profit extends Output {
                 .collect(Collectors.joining("\n"));
 
         final String profit = ProfitChecker.getProfitSum(portfolio)
-                .map(e -> "Profit summary: " + e.setScale(2, RoundingMode.DOWN)
-                ).orElse("");
+                .map(e -> "Profit summary: " + e.setScale(2, RoundingMode.DOWN))
+                .orElse("");
         final String revenue = ProfitChecker.getRevenueSum(portfolio)
-                .map(e -> "Revenue summary: " + e.setScale(2, RoundingMode.DOWN)
-                ).orElse("");
+                .map(e -> "Revenue summary: " + e.setScale(2, RoundingMode.DOWN))
+                .orElse("");
         return portfolioAssets + System.lineSeparator() + profit + System.lineSeparator() + revenue;
     }
 

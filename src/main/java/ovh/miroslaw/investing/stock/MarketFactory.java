@@ -12,17 +12,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class MarketFactory {
 
+    public Optional<String> getAccessKey() {
+        return accessKey;
+    }
+
     private final CommandSpec commandSpec;
 
-    private static Optional<String> exchangeCurrency;
-    private static Optional<String> accessKey;
+    private final Optional<String> exchangeCurrency;
+
+    public Optional<String> getExchangeCurrency() {
+        return exchangeCurrency;
+    }
+
+    Optional<String> accessKey;
     private static boolean errorOption;
-    private static final BiFunction<Optional<String>, String, YahooService> getYahooService = (currency, key) -> currency
+    final BiFunction<Optional<String>, String, YahooService> getYahooService = (currency, key) -> currency
             .map(e -> new YahooService(key, e))
             .orElse(new YahooService(key));
 
@@ -35,19 +43,12 @@ public class MarketFactory {
                 .orElse(true);
     }
 
-    public List<Asset> getAssets(List<Portfolio> portfolio, Market market) {
-        return (List<Asset>) market.assetsInfo.apply(portfolio);
+    public List<Asset> getAssets(List<Portfolio> portfolio, MarketEnum market) {
+        return (List<Asset>) market.assetsInfo.apply(this, portfolio);
     }
 
-    public List<Asset> getAssets(List<Portfolio> portfolio, Market stock, Market crypto) {
-        return combineAssets(stock.assetsInfo.apply(portfolio), crypto.assetsInfo.apply(portfolio));
-    }
-
-    public static void printError(String assetName) {
-        if (errorOption) {
-            System.out.println(
-                    Ansi.AUTO.string("@|bold,red Couldn't fetch information about + " + assetName + "!|@"));
-        }
+    public List<Asset> getAssets(List<Portfolio> portfolio, MarketEnum stock, MarketEnum crypto) {
+        return combineAssets(stock.assetsInfo.apply(this, portfolio), crypto.assetsInfo.apply(this, portfolio));
     }
 
     private List<Asset> combineAssets(List<? extends Asset> stockAssets, List<? extends Asset> cryptoAssets) {
@@ -60,7 +61,7 @@ public class MarketFactory {
                 .findAny();
     }
 
-    private static List<? extends Asset> getMarketstackAssets(List<Portfolio> e) {
+    List<? extends Asset> getMarketstackAssets(List<Portfolio> e) {
         Optional<MarketstackService> marketstack = accessKey.map(MarketstackService::new);
         if (marketstack.isPresent()) {
             try {
@@ -72,22 +73,10 @@ public class MarketFactory {
         return Collections.emptyList();
     }
 
-    public enum Market {
-        COINBASE(e -> exchangeCurrency
-                .map(CoinbaseService::new)
-                .map(c -> c.getAssetsInfo(e))
-                .orElse(new CoinbaseService().getAssetsInfo(e))
-        ),
-        YAHOO(e -> accessKey.map(key -> getYahooService.apply(exchangeCurrency, key))
-                .map(y -> y.getAssetsInfo(e))
-                .orElse(Collections.emptyList())),
-        BIZ(e -> new BiznesRadarService().getAssetsInfo(e)),
-        MARKETSTACK(MarketFactory::getMarketstackAssets);
-
-        private final Function<List<Portfolio>, List<? extends Asset>> assetsInfo;
-
-        Market(Function<List<Portfolio>, List<? extends Asset>> assetsInfo) {
-            this.assetsInfo = assetsInfo;
+    public static void printError(String assetName) {
+        if (errorOption) {
+            System.out.println(
+                    Ansi.AUTO.string("@|bold,red Couldn't fetch information about + " + assetName + "!|@"));
         }
     }
 }

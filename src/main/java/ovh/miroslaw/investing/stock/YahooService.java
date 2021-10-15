@@ -19,13 +19,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static ovh.miroslaw.investing.model.AssetType.CC;
 import static ovh.miroslaw.investing.model.AssetType.CRYPTO;
 import static ovh.miroslaw.investing.model.AssetType.GPW;
 
 public class YahooService {
 
     public static final String BASE_URL = "https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=";
-    private String accessKey;
+    private final String accessKey;
     private String exchangeCurrency = "USD";
 
     public YahooService(String accessKey) {
@@ -44,8 +45,6 @@ public class YahooService {
     private List<Yahoo> fetchData(List<String> assetsSymbol) {
         try {
             final String assetsSymbolQuery = String.join(",", assetsSymbol);
-            System.out.println(BASE_URL + assetsSymbolQuery);
-            // TODO can fetch only 10 assets
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + assetsSymbolQuery))
                     .header("x-api-key", accessKey)
@@ -85,11 +84,13 @@ public class YahooService {
         final Stream<String> gpw = assets.stream()
                 .filter(e -> GPW.equals(e.type()))
                 .map(e -> e.assetSymbol() + ".WA");
+        final Stream<String> cc = assets.stream()
+                .filter(e -> CC.equals(e.type()))
+                .map(Portfolio::assetSymbol);
         final Stream<String> crypto = assets.stream()
                 .filter(e -> CRYPTO.equals(e.type()))
                 .map(e -> e.assetSymbol() + "-" + exchangeCurrency);
-
-        return Stream.concat(gpw, crypto)
+        return Stream.concat(Stream.concat(gpw, crypto), cc)
                 .collect(toList());
     }
 }

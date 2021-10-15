@@ -1,11 +1,11 @@
 package ovh.miroslaw.investing.model;
 
 public enum AssetType {
-    CRYPTO("crypto"), GPW("gpw"), STOCK("stock");
+    CRYPTO("crypto"), GPW("gpw"), STOCK("stock"), CC("crypto-crypto");
 
     private final String type;
 
-    private AssetType(String type) {
+    AssetType(String type) {
         this.type = type;
     }
 

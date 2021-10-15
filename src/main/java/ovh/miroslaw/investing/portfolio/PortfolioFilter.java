@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static ovh.miroslaw.investing.model.AssetType.CC;
 import static ovh.miroslaw.investing.model.AssetType.CRYPTO;
 import static ovh.miroslaw.investing.model.AssetType.GPW;
 
@@ -32,7 +33,8 @@ public class PortfolioFilter {
         return applyFilter(portfolio, typeFilter, assetsFilter);
     }
 
-    private Predicate<Portfolio> convertTypeOptionToPredicate(Optional<String> typeOption) throws RetrievingDataException {
+    private Predicate<Portfolio> convertTypeOptionToPredicate(Optional<String> typeOption)
+            throws RetrievingDataException {
         Predicate<Portfolio> typeFilter;
         try {
             typeFilter = typeOption.map(AssetType::valueOf)
@@ -63,6 +65,7 @@ public class PortfolioFilter {
         return switch (type) {
             case CRYPTO -> e -> CRYPTO.equals(e.type());
             case GPW -> e -> GPW.equals(e.type());
+            case CC -> e -> CC.equals(e.type());
             case STOCK -> e -> true;
         };
     }
