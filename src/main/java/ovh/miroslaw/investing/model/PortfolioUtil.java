@@ -1,7 +1,5 @@
 package ovh.miroslaw.investing.model;
 
-import picocli.CommandLine.Help.Ansi;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;

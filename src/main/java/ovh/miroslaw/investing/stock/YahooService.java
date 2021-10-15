@@ -56,7 +56,6 @@ public class YahooService {
             return deserializeJson(response.body());
 
         } catch (Exception e) {
-            e.printStackTrace();
             MarketFactory.printError("Yahoo api error");
             return Collections.emptyList();
         }
