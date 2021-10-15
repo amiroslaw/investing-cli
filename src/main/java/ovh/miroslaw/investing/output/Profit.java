@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Profit extends Output {
+public class Profit implements Output {
 
     private final Output output;
     private final List<Portfolio> portfolio;

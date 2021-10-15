@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Short extends Output {
+public class Short implements Output {
 
     public static final Function<List<? extends Asset>, String> shortOutput = e -> e.stream()
             .map(a -> a.assetName() + " " + a.price().setScale(2, RoundingMode.DOWN))

@@ -4,7 +4,7 @@ import ovh.miroslaw.investing.model.Asset;
 
 import java.util.List;
 
-public class Console extends OutputDecorator {
+public class Console implements OutputDecorator {
 
     private Output output;
 

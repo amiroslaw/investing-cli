@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-public class Alert extends OutputDecorator {
+public class Alert implements OutputDecorator {
 
     private final List<Portfolio> portfolio;
     private final Optional<File> soundOption;

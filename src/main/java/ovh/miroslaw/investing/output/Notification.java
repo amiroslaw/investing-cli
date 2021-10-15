@@ -4,7 +4,7 @@ import ovh.miroslaw.investing.model.Asset;
 
 import java.util.List;
 
-public class Notification extends OutputDecorator {
+public class Notification implements OutputDecorator {
 
     private Output output;
 

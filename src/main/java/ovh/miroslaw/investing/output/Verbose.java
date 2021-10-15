@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Verbose extends OutputDecorator {
+public class Verbose implements OutputDecorator {
 
     private final Function<List<? extends Asset>, String> verboseOutput = e -> e.stream()
             .map(Objects::toString)
