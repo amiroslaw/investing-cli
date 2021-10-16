@@ -1,9 +1,10 @@
 = Investing-cli
 
 The simple terminal application for tracking financial assets. It can monitor profits from a portfolio. +
-Motivation for making this application was to try the new java features (java 16), graalVM and libraries like http://kong.github.io/unirest-java/#responses[unirest java], https://gitlab.com/ongresinc/fluent-process[fluent process] and the framework https://github.com/remkop/picocli[picocli]. +
-The program supports cryptocurrencies (Coinbase APi) and stock market assets (https://www.biznesradar.pl/[Biznes Radar] side). I wanted to track the prices from GPW - Polish stock exchange, unfortunately I couldn't find free API for that, so I have to scraped date from the Biznes Radar side. + 
+Motivation for making this application was to try the new java features (java 16), graalVM and https://gitlab.com/ongresinc/fluent-process[fluent process] and the framework https://github.com/remkop/picocli[picocli]. +
+The program supports cryptocurrencies and stock market assets YahooFinanceAPI (some Crypto - Crypto trade data are not accessible).
 Currently, it runs only in GNU/Linux distributions. It requires `mpv` nad `notiy-send` commands.
+https://www.yahoofinanceapi.com/[YahooFinanceAPI] requires API key. You need run app with the `-k` flag.
 
 === Features:
 - tracking financial assets
@@ -11,6 +12,11 @@ Currently, it runs only in GNU/Linux distributions. It requires `mpv` nad `notiy
 - calculating profit
 - adding alerts
 - support cryptocurrency and GPW
+
+In the future it will be possible to change the provider:
+- Coinbase APi
+- MarketStack
+- https://www.biznesradar.pl/[Biznes Radar] - scraper for GPW - Polish stock exchange
 
 === How to use
 In the first place you have to make configuration file `portfolio.json` in `$HOME` or `XDG_CONFIG_HOME` folder.
@@ -86,6 +92,12 @@ Your investing portfolio
   -v, --verbose              Shows verbose output.
   -V, --version              Print version information and exit.
 ----
+
+=== Installation
+
+In order to build a native-image you need to have current GraalVM and prepare local environment - https://www.graalvm.org/reference-manual/native-image/[tutorial]. +
+Go to the project directory and execute: +
+`mvn package`
 
 === Used technology
 
