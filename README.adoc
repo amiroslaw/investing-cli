@@ -19,9 +19,26 @@ In the future it will be possible to change the provider:
 - https://www.biznesradar.pl/[Biznes Radar] - scraper for GPW - Polish stock exchange
 
 === How to use
-In the first place you have to make configuration file `portfolio.json` in `$HOME` or `XDG_CONFIG_HOME` folder.
+In the first place you have to make configuration file `portfolio.json` or `portfolio.yaml` in `$HOME` or `XDG_CONFIG_HOME` folder.
 
-.Example portfolio.json file
+
+.Example for portfolio.yaml file
+[source,yaml]
+----
+- assetName: CIECH
+assetSymbol: CIE
+type: GPW
+holdings:
+- buyPrice: 44
+amount: 32
+alerts:
+- price: 60
+alertCondition: ABOVE
+- price: 52
+alertCondition: ABOVE
+----
+
+.Example for portfolio.json file
 [source,json]
 ----
 [
@@ -53,29 +70,36 @@ In the first place you have to make configuration file `portfolio.json` in `$HOM
 
 **Parameters** +
 
-- type - asset type `GPW` or `CRYPTO`
-- assetName - `GPW` type it have to mach the asset's name from Biznes Radar
-- assetSymbol - currency symbol
+- type - asset type `GPW`, `CRYPTO` or `CC` (crypto-crypto)
+- assetName - your name for asset
+- assetSymbol - currency or asset symbol, it has to be the sam like in yahoo API
 - holdings - put `buyPrice` or `sellPrice` depends on of the investing type and how much did you invested
 - alerts - the price level when alert will be active. It takes one of the `alertCondition` - `BELOW` or `ABOVE`
 
 ==== Available commands
 
 ----
-Usage: investing cli [-ahnpvV] [--[no-]errors] [-c=<portfolioFile>]
+Usage: investing cli [-ahlnpvV] [--[no-]errors] [-c=<portfolioFile>]
                      [-e=<exchangeCurrency>] [-k=<accessKey>]
                      [-o=<onlyAssetsOption>] [-s=<soundAlert>] [-t=<typeOption>]
-Your investing portfolio
+Your investing portfolio.
+Make configuration file `portfolio.json` or `portfolio.yaml` in `$HOME` or
+`XDG_CONFIG_HOME` folder.
+
   -a, --alert                Check out alerts. With the --sound option it will
-                               play sound with notification
+                               play sound
   -c, --configuration=<portfolioFile>
                              The file with the assets that you want to trace or
                                you own. Provide file or put it in one of the
-                               folders: - $HOME
-                             - investing/portfolio.json
+                               folders: - $HOME/portfolio
+                             - investing/portfolio
   -e, --exchange-currency=<exchangeCurrency>
                              Exchange currency for cryptocurrency currency pair.
   -h, --help                 Show this help message and exit.
+  -k, --key=<accessKey>      Private access key.
+                             Get it from https://www.yahoofinanceapi.com/
+  -l, --one-line             Prints short output in one line. Good for showing
+                               information on a status bar.
   -n, --notify               Shows notification in dunst.
       --[no-]errors          Doesn't print errors in the output
   -o, --only=<onlyAssetsOption>
@@ -86,9 +110,12 @@ Your investing portfolio
                                will calculate revenue.
                              Remember to change --exchange-currency in order to
                                have the same currency in all markets.
-  -s, --sound=<soundAlert>   Audio file for the sound alerts. It requires mpv.
+                             Program supports json and yaml formats.
+
+  -s, --sound=<soundAlert>   Audio file for the sound alerts. It requires
+                               ffmpeg.
   -t, --type=<typeOption>    Process only for specific assets. Accepts: CRYPTO,
-                               GPW, STOCK
+                               GPW, STOCK, CC (crypto crypto)
   -v, --verbose              Shows verbose output.
   -V, --version              Print version information and exit.
 ----

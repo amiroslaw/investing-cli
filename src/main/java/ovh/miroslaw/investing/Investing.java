@@ -31,7 +31,10 @@ import static ovh.miroslaw.investing.portfolio.PortfolioReader.getConfigPath;
 
 @Command(name = "investing cli", mixinStandardHelpOptions = true,
          version = "1.0",
-         description = "Your investing portfolio")
+         description = """
+                    Your investing portfolio.
+                    Make configuration file `portfolio.json` or `portfolio.yaml` in `$HOME` or `XDG_CONFIG_HOME` folder.
+                    """)
 class Investing implements Callable<Integer> {
 
     @Spec
@@ -53,6 +56,7 @@ class Investing implements Callable<Integer> {
             description = """
                     Shows profits from your portfolio. If sell or buy price are not provided in the config file it will calculate revenue.
                     Remember to change --exchange-currency in order to have the same currency in all markets. 
+                    Program supports json and yaml formats. 
                     """)
     private boolean holdingOption;
 
@@ -81,7 +85,7 @@ class Investing implements Callable<Integer> {
     @Option(names = {"-t", "--type"}, description = "Process only for specific assets. Accepts: CRYPTO, GPW, STOCK, CC (crypto crypto)")
     private Optional<String> typeOption;
 
-    @Option(names = {"-k", "--key"}, description = "Private access key.\nGet it from https://marketstack.com/dashboard")
+    @Option(names = {"-k", "--key"}, description = "Private access key.\nGet it from https://www.yahoofinanceapi.com/")
     private Optional<String> accessKey;
 
     @Option(names = {"-s", "--sound"},

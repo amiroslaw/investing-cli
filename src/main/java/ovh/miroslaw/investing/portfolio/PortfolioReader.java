@@ -2,6 +2,7 @@ package ovh.miroslaw.investing.portfolio;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FilenameUtils;
 import ovh.miroslaw.investing.RetrievingDataException;
 import ovh.miroslaw.investing.RetrievingDataException.ErrorCode;
 import ovh.miroslaw.investing.model.AlertCondition;
@@ -13,6 +14,7 @@ import ovh.miroslaw.investing.model.Portfolio.Holding;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +26,16 @@ public class PortfolioReader {
     private PortfolioReader() {
     }
 
-    public static final String PORTFOLIO_FILE_NAME = "portfolio.json";
+    public static final String PORTFOLIO_FILE_NAME = "portfolio";
     public static final String CONFIG_FILE_NAME = "investing";
 
     public static List<Portfolio> getPortfolio(File portfolioConfig) throws RetrievingDataException {
         try {
-            return deserialize(portfolioConfig);
+            final String fileExtension = FilenameUtils.getExtension(portfolioConfig.getName());
+            final ConfigExtension.configExt configExt = ConfigExtension.configExt.valueOf(fileExtension.toUpperCase());
+            return deserialize(portfolioConfig, configExt);
         } catch (Exception e) {
+            e.printStackTrace();
             final String errorMsg = "Error with reading portfolio file from: " + portfolioConfig.getAbsolutePath();
             throw new RetrievingDataException(errorMsg, ErrorCode.SOFTWARE);
         }
@@ -41,12 +46,19 @@ public class PortfolioReader {
         final Map<String, String> environment = processBuilder.environment();
         final Optional<String> xdgConfigHome = Optional.of(environment.get("XDG_CONFIG_HOME"));
         final String home = environment.get("HOME");
-        return Path.of(xdgConfigHome.map(e -> e + "/" + CONFIG_FILE_NAME)
-                .orElse(home + ".") + "/" + PORTFOLIO_FILE_NAME);
+        final String pathWithoutExtension =
+                xdgConfigHome.map(e -> e + File.separator + CONFIG_FILE_NAME + File.separator)
+                        .orElse(home + "./") + PORTFOLIO_FILE_NAME + ".";
+        final Path yamlPath = Path.of(pathWithoutExtension + ConfigExtension.configExt.YAML.name().toLowerCase());
+        if (Files.exists(yamlPath)) {
+            return yamlPath;
+        } else {
+            return Path.of(pathWithoutExtension + ConfigExtension.configExt.JSON.name().toLowerCase());
+        }
     }
 
-    private static List<Portfolio> deserialize(File portfolioConfig) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
+    private static List<Portfolio> deserialize(File portfolioConfig, ConfigExtension.configExt ext) throws IOException {
+        ObjectMapper mapper = new ObjectMapper(ext.getFactory());
         JsonNode assets = mapper.readTree(portfolioConfig);
         List<Portfolio> portfolio = new ArrayList<>();
         for (JsonNode asset : assets) {
