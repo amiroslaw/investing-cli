@@ -3,7 +3,6 @@ package ovh.miroslaw.investing.stock;
 import ovh.miroslaw.investing.model.Asset;
 import ovh.miroslaw.investing.model.Portfolio;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -13,10 +12,11 @@ public enum MarketEnum {
             .map(c -> c.getAssetsInfo(p))
             .orElse(new CoinbaseService().getAssetsInfo(p))
     ),
-    YAHOO((m, p) -> m.getAccessKey()
-            .map(key -> m.getYahooService.apply(m.getExchangeCurrency(), key))
-            .map(y -> y.getAssetsInfo(p))
-            .orElse(Collections.emptyList())),
+    YAHOO((m, p) ->
+    {
+        YahooService yahooService = m.getYahooService.apply(m.getExchangeCurrency(), m.getAccessKey());
+        return yahooService.getAssetsInfo(p);
+    }),
     BIZ((m, p) -> new BiznesRadarService().getAssetsInfo(p)),
     MARKETSTACK((m, p) -> m.getMarketstackAssets(p));
 

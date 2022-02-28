@@ -16,17 +16,9 @@ import java.util.stream.Stream;
 
 public class MarketFactory {
 
-    public Optional<String> getAccessKey() {
-        return accessKey;
-    }
-
     private final CommandSpec commandSpec;
 
     private final Optional<String> exchangeCurrency;
-
-    public Optional<String> getExchangeCurrency() {
-        return exchangeCurrency;
-    }
 
     Optional<String> accessKey;
     private static boolean errorOption;
@@ -75,8 +67,22 @@ public class MarketFactory {
 
     public static void printError(String assetName) {
         if (errorOption) {
-            System.out.println(
-                    Ansi.AUTO.string("@|bold,red Couldn't fetch information about + " + assetName + "!|@"));
+            System.out.println(Ansi.AUTO.string("@|bold,red Couldn't fetch information about + " + assetName + "!|@"));
         }
     }
+
+    public Optional<String> getExchangeCurrency() {
+        return exchangeCurrency;
+    }
+
+    public String getAccessKey() {
+        if (accessKey.isPresent()) {
+            return accessKey.get();
+        } else {
+            printError("Provide private access key");
+            System.exit(2);
+            return "";
+        }
+    }
+
 }

@@ -30,6 +30,10 @@ public class AlertChecker {
     }
 
     private static Optional<String> checkAlert(Portfolio portfolio, BigDecimal currentPrice) {
+        if (currentPrice == null) {
+            return Optional.empty();
+        }
+
         for (Alert alert : portfolio.alerts()) {
             final boolean priceIsAboveAlert =
                     alert.alertCondition() == ABOVE && currentPrice.compareTo(alert.price()) >= 0;
