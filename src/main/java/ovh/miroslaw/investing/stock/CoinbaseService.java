@@ -43,7 +43,7 @@ public class CoinbaseService {
                     .asJson();
             final Coinbase coinbase = new ObjectMapper()
                     .readValue(response.getBody().getObject().get("data").toString(), Coinbase.class);
-            return Optional.of(new Coinbase(portfolioAsset.assetName(), coinbase.assetSymbol(),
+            return Optional.of(new Coinbase(portfolioAsset.assetName(), portfolioAsset.assetSymbol(), coinbase.assetSymbol(),
                     coinbase.exchangeCurrency(), coinbase.price()));
         } catch (Exception e) {
             MarketFactory.printError(portfolioAsset.assetName());

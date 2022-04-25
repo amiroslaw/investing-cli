@@ -51,7 +51,7 @@ public class BiznesRadarService {
         final Elements trends = doc.select("table.trends");
         final String trend = trends.select("td").get(2).text();
 
-        return Optional.of(new BiznesRadar(portfolioAsset.assetName(), convertToBigDecimal(price),
+        return Optional.of(new BiznesRadar(portfolioAsset.assetName(), portfolioAsset.assetSymbol(), convertToBigDecimal(price),
                 convertToBigDecimal(minPrice),
                 convertToBigDecimal(maxPrice),
                 priceChangePercent, rating, atIndicator, trend));

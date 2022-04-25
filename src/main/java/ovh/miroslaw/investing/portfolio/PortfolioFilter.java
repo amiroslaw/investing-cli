@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 import static ovh.miroslaw.investing.model.AssetType.CC;
 import static ovh.miroslaw.investing.model.AssetType.CRYPTO;
 import static ovh.miroslaw.investing.model.AssetType.GPW;
+import static ovh.miroslaw.investing.model.AssetType.STOCK;
 
 public class PortfolioFilter {
 
@@ -66,7 +67,7 @@ public class PortfolioFilter {
             case CRYPTO -> e -> CRYPTO.equals(e.type());
             case GPW -> e -> GPW.equals(e.type());
             case CC -> e -> CC.equals(e.type());
-            case STOCK -> e -> true;
+            case STOCK -> e -> STOCK.equals(e.type());
         };
     }
 

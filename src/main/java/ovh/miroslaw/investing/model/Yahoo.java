@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public record Yahoo(String assetName,
+                    String symbol,
                     BigDecimal price,
                     BigDecimal minPrice,
                     BigDecimal maxPrice,
@@ -13,10 +14,10 @@ public record Yahoo(String assetName,
     @Override
     public String toString() {
         return """
-                %s %s %s%%
+                %s (%s) %s %s%%
                    day range %s - %s
                    year range %s
-                """.formatted(assetName,
+                """.formatted(assetName, symbol,
                 Objects.requireNonNullElse(price, "#"),
                 priceChangePercent,
                 Objects.requireNonNullElse(minPrice, "#"),

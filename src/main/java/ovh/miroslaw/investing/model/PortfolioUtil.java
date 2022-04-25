@@ -15,12 +15,11 @@ public class PortfolioUtil {
         return assets.stream()
                 .filter(Objects::nonNull)
                 .filter(e -> e.price() != null)
-                .collect(Collectors.toMap(Asset::assetName, Asset::price));
+                .collect(Collectors.toMap(asset -> splitSymbolFromMarket(asset.symbol()), Asset::price));
     }
 
-    public static Map<String, Portfolio> convertPortfolioToSymbolMap(List<Portfolio> portfolio) {
-        return portfolio.stream()
-                .collect(Collectors.toMap(Portfolio::assetName, p -> p));
+    public static String splitSymbolFromMarket(String symbol) {
+        final String[] split = symbol.split("\\.");
+        return split[0];
     }
-
 }

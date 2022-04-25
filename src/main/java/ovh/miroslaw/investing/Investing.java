@@ -71,8 +71,7 @@ class Investing implements Callable<Integer> {
     @Option(names = {"-c", "--configuration"},
             description =
                     "The file with the assets that you want to trace or you own. Provide file or put it in one of the folders: - $HOME"
-                            + "/" + PORTFOLIO_FILE_NAME +
-                            "\n- " + CONFIG_FILE_NAME + "/" + PORTFOLIO_FILE_NAME)
+                    + "/" + PORTFOLIO_FILE_NAME + "\n`XDG_CONFIG_HOME`/" + CONFIG_FILE_NAME + "/" + PORTFOLIO_FILE_NAME)
     private Optional<File> portfolioFile;
 
     @Option(names = {"-e", "--exchange-currency"}, description = "Exchange currency for cryptocurrency currency pair.")
@@ -113,7 +112,7 @@ class Investing implements Callable<Integer> {
 
         Output output = new Output() {};
         if (barOutputOption) {
-            output = new ShortWithSymbol(portfolio, output);
+            output = new ShortWithSymbol(output);
         }
         if (verboseOption) {
             output = new Verbose(output);

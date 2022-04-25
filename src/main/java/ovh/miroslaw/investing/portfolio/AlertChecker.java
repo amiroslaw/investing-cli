@@ -24,7 +24,7 @@ public class AlertChecker {
         final Map<String, BigDecimal> assetsMap = PortfolioUtil.convertAssetsToNamePriceMap(assets);
         return portfolio.stream()
                 .filter(e -> !e.alerts().isEmpty())
-                .map(e -> checkAlert(e, assetsMap.get(e.assetName())))
+                .map(e -> checkAlert(e, assetsMap.get(e.assetSymbol())))
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining(System.lineSeparator()));
     }
@@ -40,15 +40,18 @@ public class AlertChecker {
             final boolean priceIsBelowAlert = alert.alertCondition() == AlertCondition.BELOW
                     && currentPrice.compareTo(alert.price()) <= 0;
             if (priceIsAboveAlert) {
-                return Optional.of(createMsg(portfolio.assetName(), alert.price(), ABOVE));
+                return Optional.of(createMsg(portfolio.assetName(), currentPrice, alert.price(), ABOVE));
             } else if (priceIsBelowAlert) {
-                return Optional.of(createMsg(portfolio.assetName(), alert.price(), BELOW));
+                return Optional.of(createMsg(portfolio.assetName(), currentPrice, alert.price(), BELOW));
             }
         }
         return Optional.empty();
     }
 
-    private static String createMsg(String assetName, BigDecimal alert, AlertCondition condition) {
-        return assetName + " is " + condition + " " + alert;
+    private static String createMsg(String assetName, BigDecimal currentPrice, BigDecimal alertPrice,
+            AlertCondition condition) {
+        return """
+                %s (%.0f) is %.0f %s;
+                """.formatted(assetName, currentPrice, alertPrice, condition);
     }
 }

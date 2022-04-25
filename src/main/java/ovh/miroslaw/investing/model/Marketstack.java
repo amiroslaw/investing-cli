@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Marketstack(
         @JsonProperty(value = "base") String assetName,
+        String symbol,
         @JsonProperty(value = "amount") BigDecimal price,
         BigDecimal open, BigDecimal high, BigDecimal low
 ) implements Asset {

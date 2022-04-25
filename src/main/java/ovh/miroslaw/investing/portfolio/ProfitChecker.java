@@ -25,8 +25,8 @@ public class ProfitChecker {
 
         return portfolio.stream()
                 .filter(e -> !e.holdings().isEmpty())
-                .filter(e -> assetsMap.get(e.assetName()) != null)
-                .collect(Collectors.toMap(e -> e, e -> calculateProfitAndRevenue(e, assetsMap.get(e.assetName()))));
+                .filter(e -> assetsMap.get(e.assetSymbol()) != null)
+                .collect(Collectors.toMap(e -> e, e -> calculateProfitAndRevenue(e, assetsMap.get(e.assetSymbol()))));
     }
 
     public static Optional<BigDecimal> getRevenueSum(Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> portfolioMap) {

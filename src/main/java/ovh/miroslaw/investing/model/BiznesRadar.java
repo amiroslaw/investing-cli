@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public record BiznesRadar(String assetName,
+                          String symbol,
                           BigDecimal price,
                           BigDecimal minPrice,
                           BigDecimal maxPrice,

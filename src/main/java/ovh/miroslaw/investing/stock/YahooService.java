@@ -19,9 +19,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.*;
 import static ovh.miroslaw.investing.model.AssetType.CC;
 import static ovh.miroslaw.investing.model.AssetType.CRYPTO;
 import static ovh.miroslaw.investing.model.AssetType.GPW;
+import static ovh.miroslaw.investing.model.AssetType.STOCK;
 
 public class YahooService {
 
@@ -53,7 +55,7 @@ public class YahooService {
             HttpResponse<String> response = HttpClient.newHttpClient()
                     .send(request, BodyHandlers.ofString());
 
-            return deserializeJson(response.body());
+            return createAsset(response.body());
 
         } catch (Exception e) {
             MarketFactory.printError("Yahoo api error");
@@ -61,20 +63,21 @@ public class YahooService {
         }
     }
 
-    private List<Yahoo> deserializeJson(String response) throws JsonProcessingException {
+    private List<Yahoo> createAsset(String response) throws JsonProcessingException {
         final JsonNode data = new ObjectMapper()
                 .readTree(response).get("quoteResponse").get("result");
 
         List<Yahoo> assets = new ArrayList<>();
         for (com.fasterxml.jackson.databind.JsonNode assetNode : data) {
             final String shortName = assetNode.get("shortName").asText();
+            final String symbol = assetNode.get("symbol").asText();
             final BigDecimal price = BigDecimal.valueOf(assetNode.get("regularMarketPrice").asDouble());
             final BigDecimal priceChangePercent = BigDecimal.valueOf(
                     assetNode.get("regularMarketChangePercent").asDouble()).setScale(2, RoundingMode.HALF_UP);
             final BigDecimal minPrice = BigDecimal.valueOf(assetNode.get("regularMarketDayLow").asDouble());
             final BigDecimal maxPrice = BigDecimal.valueOf(assetNode.get("regularMarketDayHigh").asDouble());
             final String fiftyTwoWeekRange = assetNode.get("fiftyTwoWeekRange").asText();
-            assets.add(new Yahoo(shortName, price, minPrice, maxPrice, priceChangePercent, fiftyTwoWeekRange));
+            assets.add(new Yahoo(shortName, symbol, price, minPrice, maxPrice, priceChangePercent, fiftyTwoWeekRange));
         }
         return assets;
     }
@@ -86,10 +89,13 @@ public class YahooService {
         final Stream<String> cc = assets.stream()
                 .filter(e -> CC.equals(e.type()))
                 .map(Portfolio::assetSymbol);
+        final Stream<String> stock = assets.stream()
+                .filter(e -> STOCK.equals(e.type()))
+                .map(Portfolio::assetSymbol);
         final Stream<String> crypto = assets.stream()
                 .filter(e -> CRYPTO.equals(e.type()))
                 .map(e -> e.assetSymbol() + "-" + exchangeCurrency);
-        return Stream.concat(Stream.concat(gpw, crypto), cc)
+        return concat(concat(concat(stock,gpw), crypto), cc)
                 .collect(toList());
     }
 }
