@@ -22,4 +22,14 @@ public class PortfolioUtil {
         final String[] split = symbol.split("\\.");
         return split[0];
     }
+
+    public static BigDecimal getAssetPrice(String exchangeCurrency, Map<String, BigDecimal> assetsMap,
+            Portfolio portfolio) {
+        String assetSymbol = portfolio.assetSymbol();
+        if (portfolio.type() == AssetType.CRYPTO) {
+            assetSymbol += "-" + exchangeCurrency;
+        }
+        return assetsMap.get(assetSymbol);
+    }
+
 }

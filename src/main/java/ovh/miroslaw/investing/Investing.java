@@ -118,10 +118,11 @@ class Investing implements Callable<Integer> {
             output = new Verbose(output);
         }
         if (holdingOption) {
-            output = new Profit(portfolio, output);
+            final String currency = exchangeCurrency.orElse(Constant.DEFAULT_EXCHANGE_CURRENCY.value);
+            output = new Profit(portfolio, currency, output);
         }
         if (alertOption) {
-            output = new Alert(portfolio, soundAlert, output);
+            output = new Alert(portfolio, commandSpec, output);
         }
         if (notifyOption) {
             output = new Notification(output);

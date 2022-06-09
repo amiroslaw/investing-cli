@@ -13,37 +13,42 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.jooq.lambda.tuple.Tuple.tuple;
+import static ovh.miroslaw.investing.model.PortfolioUtil.getAssetPrice;
 
 public class ProfitChecker {
 
-    private ProfitChecker() {
+    private final String exchangeCurrency;
+
+    public ProfitChecker(String exchangeCurrency) {
+        this.exchangeCurrency = exchangeCurrency;
     }
 
-    public static Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> checkPortfolio(List<Portfolio> portfolio,
+    public Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> checkPortfolio(List<Portfolio> portfolio,
             List<? extends Asset> assets) {
         final Map<String, BigDecimal> assetsMap = PortfolioUtil.convertAssetsToNamePriceMap(assets);
 
+
         return portfolio.stream()
                 .filter(e -> !e.holdings().isEmpty())
-                .filter(e -> assetsMap.get(e.assetSymbol()) != null)
-                .collect(Collectors.toMap(e -> e, e -> calculateProfitAndRevenue(e, assetsMap.get(e.assetSymbol()))));
+                .filter(e -> getAssetPrice(exchangeCurrency, assetsMap, e) != null)
+                .collect(Collectors.toMap(e -> e, e -> calculateProfitAndRevenue(e, getAssetPrice(exchangeCurrency, assetsMap, e))));
     }
 
-    public static Optional<BigDecimal> getRevenueSum(Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> portfolioMap) {
+    public Optional<BigDecimal> getRevenueSum(Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> portfolioMap) {
         BigDecimal sum = portfolioMap.values().stream()
                 .map(e -> e.v2)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return wrapWithOptional(sum);
     }
 
-    public static Optional<BigDecimal> getProfitSum(Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> portfolioMap) {
+    public Optional<BigDecimal> getProfitSum(Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> portfolioMap) {
         BigDecimal sum = portfolioMap.values().stream()
                 .map(e -> e.v1)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return wrapWithOptional(sum);
     }
 
-    private static Optional<BigDecimal> wrapWithOptional(BigDecimal sum) {
+    private Optional<BigDecimal> wrapWithOptional(BigDecimal sum) {
         if (sum.equals(BigDecimal.ZERO)) {
             return Optional.empty();
         } else {
@@ -51,7 +56,7 @@ public class ProfitChecker {
         }
     }
 
-    private static Tuple2<BigDecimal, BigDecimal> calculateProfitAndRevenue(Portfolio portfolio,
+    private Tuple2<BigDecimal, BigDecimal> calculateProfitAndRevenue(Portfolio portfolio,
             BigDecimal currentPrice) {
         BigDecimal profitSum = BigDecimal.ZERO;
         BigDecimal revenueSum = BigDecimal.ZERO;

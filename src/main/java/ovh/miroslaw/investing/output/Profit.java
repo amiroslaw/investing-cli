@@ -15,34 +15,36 @@ public class Profit implements Output {
 
     private final Output output;
     private final List<Portfolio> portfolio;
+    private final ProfitChecker profitChecker;
 
-    public Profit(List<Portfolio> portfolio, Output output) {
+    public Profit(List<Portfolio> portfolio, String exchangeCurrency, Output output) {
         this.output = output;
         this.portfolio = portfolio;
+        this.profitChecker = new ProfitChecker(exchangeCurrency);
     }
 
     @Override
     public String display(List<? extends Asset> assets) {
         String msg = output.display(assets);
-        msg += System.lineSeparator() + getMsg(ProfitChecker.checkPortfolio(portfolio, assets));
+        msg += System.lineSeparator() + getMsg(profitChecker.checkPortfolio(portfolio, assets));
         return msg;
     }
 
-    public static String getMsg(Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> portfolio) {
+    public String getMsg(Map<Portfolio, Tuple2<BigDecimal, BigDecimal>> portfolio) {
         final String portfolioAssets = portfolio.entrySet().stream()
                 .map(e -> e.getKey().assetSymbol() + " " + getProfitOrRevenue(e.getValue()))
                 .collect(Collectors.joining("\n"));
 
-        final String profit = ProfitChecker.getProfitSum(portfolio)
+        final String profit = profitChecker.getProfitSum(portfolio)
                 .map(e -> "Profit summary: " + e.setScale(2, RoundingMode.DOWN))
                 .orElse("");
-        final String revenue = ProfitChecker.getRevenueSum(portfolio)
+        final String revenue = profitChecker.getRevenueSum(portfolio)
                 .map(e -> "Revenue summary: " + e.setScale(2, RoundingMode.DOWN))
                 .orElse("");
         return portfolioAssets + System.lineSeparator() + profit + System.lineSeparator() + revenue;
     }
 
-    private static String getProfitOrRevenue(Tuple2<BigDecimal, BigDecimal> profitAndRevenue) {
+    private String getProfitOrRevenue(Tuple2<BigDecimal, BigDecimal> profitAndRevenue) {
         final boolean isProfitEqualZero = profitAndRevenue.v1.equals(BigDecimal.ZERO);
         if (isProfitEqualZero) {
             return " revenue: " + profitAndRevenue.v2.setScale(2, RoundingMode.DOWN);

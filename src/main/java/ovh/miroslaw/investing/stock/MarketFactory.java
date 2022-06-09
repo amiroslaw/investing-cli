@@ -6,7 +6,6 @@ import ovh.miroslaw.investing.model.Portfolio;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Model.ArgSpec;
 import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Model.OptionSpec;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,12 +13,14 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static ovh.miroslaw.investing.Constant.ARG_ERROR;
+import static ovh.miroslaw.investing.Constant.ARG_EXCHANGE_CURRENCY;
+import static ovh.miroslaw.investing.Constant.ARG_KEY;
+import static ovh.miroslaw.investing.Constant.getCommandParameter;
+
 public class MarketFactory {
 
-    private final CommandSpec commandSpec;
-
     private final Optional<String> exchangeCurrency;
-
     Optional<String> accessKey;
     private static boolean errorOption;
     final BiFunction<Optional<String>, String, YahooService> getYahooService = (currency, key) -> currency
@@ -27,10 +28,9 @@ public class MarketFactory {
             .orElse(new YahooService(key));
 
     public MarketFactory(CommandSpec commandSpec) {
-        this.commandSpec = commandSpec;
-        exchangeCurrency = getCommandParameter("-e").flatMap(ArgSpec::getValue);
-        accessKey = getCommandParameter("-k").flatMap(ArgSpec::getValue);
-        errorOption = getCommandParameter("--no-errors")
+        exchangeCurrency = getCommandParameter(commandSpec, ARG_EXCHANGE_CURRENCY.value).flatMap(ArgSpec::getValue);
+        accessKey = getCommandParameter(commandSpec, ARG_KEY.value).flatMap(ArgSpec::getValue);
+        errorOption = getCommandParameter(commandSpec, ARG_ERROR.value)
                 .map(e -> (Boolean) e.getValue())
                 .orElse(true);
     }
@@ -47,11 +47,6 @@ public class MarketFactory {
         return Stream.concat(stockAssets.stream(), cryptoAssets.stream()).toList();
     }
 
-    private Optional<OptionSpec> getCommandParameter(String paramName) {
-        return commandSpec.options().stream()
-                .filter(e -> e.shortestName().equals(paramName))
-                .findAny();
-    }
 
     List<? extends Asset> getMarketstackAssets(List<Portfolio> e) {
         Optional<MarketstackService> marketstack = accessKey.map(MarketstackService::new);

@@ -14,22 +14,26 @@ import java.util.stream.Collectors;
 
 import static ovh.miroslaw.investing.model.AlertCondition.ABOVE;
 import static ovh.miroslaw.investing.model.AlertCondition.BELOW;
+import static ovh.miroslaw.investing.model.PortfolioUtil.getAssetPrice;
 
 public class AlertChecker {
 
-    private AlertChecker() {
+    private final String exchangeCurrency;
+
+    public AlertChecker(String exchangeCurrency) {
+        this.exchangeCurrency = exchangeCurrency;
     }
 
-    public static String checkAlerts(List<Portfolio> portfolio, List<? extends Asset> assets) {
+    public String checkAlerts(List<Portfolio> portfolio, List<? extends Asset> assets) {
         final Map<String, BigDecimal> assetsMap = PortfolioUtil.convertAssetsToNamePriceMap(assets);
         return portfolio.stream()
                 .filter(e -> !e.alerts().isEmpty())
-                .map(e -> checkAlert(e, assetsMap.get(e.assetSymbol())))
+                .map(e -> checkAlert(e, getAssetPrice(exchangeCurrency, assetsMap, e)))
                 .flatMap(Optional::stream)
-                .collect(Collectors.joining(System.lineSeparator()));
+                .collect(Collectors.joining());
     }
 
-    private static Optional<String> checkAlert(Portfolio portfolio, BigDecimal currentPrice) {
+    private Optional<String> checkAlert(Portfolio portfolio, BigDecimal currentPrice) {
         if (currentPrice == null) {
             return Optional.empty();
         }
@@ -48,10 +52,10 @@ public class AlertChecker {
         return Optional.empty();
     }
 
-    private static String createMsg(String assetName, BigDecimal currentPrice, BigDecimal alertPrice,
+    private String createMsg(String assetName, BigDecimal currentPrice, BigDecimal alertPrice,
             AlertCondition condition) {
         return """
-                %s (%.0f) is %.0f %s;
-                """.formatted(assetName, currentPrice, alertPrice, condition);
+                %s (%.0f) is %s %.0f;
+                """.formatted(assetName, currentPrice, condition, alertPrice);
     }
 }
